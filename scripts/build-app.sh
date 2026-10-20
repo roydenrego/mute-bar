@@ -40,6 +40,8 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
     <string>13.0</string>
     <key>LSUIElement</key>
     <true/>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>MuteBar opens the microphone during a meeting so macOS delivers the AirPods mute gesture to it. Audio is discarded immediately and never recorded, stored or sent.</string>
 </dict>
 </plist>
 PLIST
