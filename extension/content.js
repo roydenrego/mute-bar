@@ -7,7 +7,9 @@
   // toolbar with a synthetic mousemove before clicking.
 
   const MIC_LABEL_RE = /micro(phone|fono|fófono|fône)|mikrofon/i;
-  const MEETING_URL_RE = /^\/[a-z]{3}-[a-z]{4}-[a-z]{3}/;
+  // Meet serves meeting URLs under /meet/ as of Oct 2026; older links, and
+  // links already in calendars, still omit it — so both forms must match.
+  const MEETING_URL_RE = /^(?:\/meet)?\/[a-z]{3}-[a-z]{4}-[a-z]{3}/;
 
   let stickyMuted = null;
   let lastPath = location.pathname;
