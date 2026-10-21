@@ -12,7 +12,7 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "permissions": ["nativeMessaging"],
+  "permissions": ["nativeMessaging", "scripting"],
   "host_permissions": ["https://meet.google.com/*"],
   "background": { "service_worker": "background.js" },
   "content_scripts": [

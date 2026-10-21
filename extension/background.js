@@ -82,4 +82,42 @@ setInterval(() => {
   }
 }, 20000);
 
+// Content scripts are injected at page load only, so reloading the extension
+// leaves any open Meet tab running an orphaned copy whose runtime connection is
+// dead: the app sees no meeting until that tab is reloaded, which means dropping
+// out of a live call to pick up a fix. Re-inject on load instead.
+//
+// A script whose context is still valid answers 'ping'; an orphaned one cannot,
+// and nor can a tab that never had one — which is exactly the distinction
+// needed to avoid injecting a second live copy alongside a working one.
+async function ensureInjected(tabId) {
+  try {
+    const res = await chrome.tabs.sendMessage(tabId, { type: 'ping' });
+    if (res && res.ok) return false;
+  } catch (_) {
+    // No live listener in that tab; fall through and inject.
+  }
+  try {
+    await chrome.scripting.executeScript({ target: { tabId }, files: ['content.js'] });
+    return true;
+  } catch (err) {
+    // Discarded tabs and pages still loading can both refuse injection.
+    console.log('MuteBar: could not inject into tab', tabId, err && err.message);
+    return false;
+  }
+}
+
+async function injectIntoOpenMeetTabs() {
+  const tabs = await chrome.tabs.query({ url: MEET_URL });
+  const injected = [];
+  for (const tab of tabs) {
+    if (tab.id != null && (await ensureInjected(tab.id))) injected.push(tab.id);
+  }
+  if (injected.length) console.log('MuteBar: injected into tabs', injected.join(', '));
+}
+
+chrome.runtime.onInstalled.addListener(() => { void injectIntoOpenMeetTabs(); });
+chrome.runtime.onStartup.addListener(() => { void injectIntoOpenMeetTabs(); });
+
 connect();
+void injectIntoOpenMeetTabs();

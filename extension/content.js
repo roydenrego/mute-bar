@@ -95,6 +95,13 @@
 
   chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     if (!msg) return;
+    if (msg.type === 'ping') {
+      // Only a script whose extension context is still valid can answer. An
+      // orphaned copy left behind by an extension reload cannot, which is how
+      // the worker tells "already injected" from "needs re-injecting".
+      sendResponse({ ok: true });
+      return false;
+    }
     if (msg.type === 'toggle') {
       toggle().then(() => sendResponse(readState()));
       return true; // async response
